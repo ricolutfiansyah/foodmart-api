@@ -5,12 +5,7 @@
 ---
 
 ## Sedang Dikerjakan
-- [ ] POST /api/v1/auth/register
-- [ ] POST /api/v1/auth/login
-- [ ] POST /api/v1/auth/refresh
-- [ ] POST /api/v1/auth/logout
-- [ ] GET /api/v1/auth/me
-- [ ] authMiddleware, roleMiddleware, errorMiddleware
+(kosong)
 
 ## Belum Dimulai
 - [ ] Categories & Foods CRUD
@@ -29,6 +24,13 @@
 - [x] src/utils/response.js
 - [x] src/utils/jwt.js (hashToken & fingerprintRequest)
 - [x] src/utils/pagination.js
+- [x] POST /api/v1/auth/register
+- [x] POST /api/v1/auth/login
+- [x] POST /api/v1/auth/refresh
+- [x] POST /api/v1/auth/logout
+- [x] GET /api/v1/auth/me
+- [x] authMiddleware, roleMiddleware, errorMiddleware
+- [x] authValidator, authRepository, authService, authController
 
 ## Catatan & Keputusan Teknis
 - Supabase Storage untuk gambar produk (bukan Cloudinary)
