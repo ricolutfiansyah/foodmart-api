@@ -54,6 +54,10 @@
 - [x] Setup Express app (index.js, app.js)
 - [x] Health check endpoint GET /health
 - [x] Setup middleware global (cors, helmet, json parser, cookie-parser)
+- [x] Buat semua model di schema.prisma
+- [x] Tambah @@unique([cartId, foodId]) di CartItem
+- [x] Jalankan prisma migrate dev
+- [x] Semua tabel terbuat di Supabase
 
 ---
 

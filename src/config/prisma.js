@@ -1,2 +1,5 @@
-// TODO: Implement prisma config
-export default {};
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export default prisma;
