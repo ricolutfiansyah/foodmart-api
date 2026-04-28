@@ -49,7 +49,11 @@
 ---
 
 ## Selesai
-(belum ada)
+- [x] Inisialisasi project (package.json, struktur folder)
+- [x] Setup environment (.env, dotenv)
+- [x] Setup Express app (index.js, app.js)
+- [x] Health check endpoint GET /health
+- [x] Setup middleware global (cors, helmet, json parser, cookie-parser)
 
 ---
 
