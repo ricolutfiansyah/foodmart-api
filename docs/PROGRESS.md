@@ -1,73 +1,41 @@
 # PROGRESS — FoodMart E-Commerce API
 
-## Status: Belum Mulai
+## Status: Session 4 — Auth (sedang dikerjakan)
 
 ---
 
-## Fase 1 — Setup & Foundation
-- [ ] Inisialisasi project (package.json, struktur folder)
-- [ ] Setup environment (.env, dotenv)
-- [ ] Konfigurasi Prisma + koneksi Supabase
-- [ ] Buat semua model di schema.prisma
-- [ ] Jalankan prisma migrate dev
-- [ ] Setup Express app (index.js, app.js)
-- [ ] Setup middleware global (cors, helmet, json parser)
-- [ ] Buat utils: asyncHandler, AppError, response helper
-- [ ] Setup Swagger
-
-## Fase 2 — Auth
+## Sedang Dikerjakan
 - [ ] POST /api/v1/auth/register
-- [ ] POST /api/v1/auth/login (return access token + set httpOnly cookie)
-- [ ] POST /api/v1/auth/refresh (rotation + reuse detection)
+- [ ] POST /api/v1/auth/login
+- [ ] POST /api/v1/auth/refresh
 - [ ] POST /api/v1/auth/logout
 - [ ] GET /api/v1/auth/me
-- [ ] Middleware: authMiddleware (verifikasi JWT)
-- [ ] Middleware: roleMiddleware (cek ADMIN)
-- [ ] Utils: hashToken (SHA-256 untuk refresh token)
-- [ ] Utils: fingerprintRequest (hash User-Agent)
+- [ ] authMiddleware, roleMiddleware, errorMiddleware
 
-## Fase 3 — Categories & Foods
-- [ ] CRUD Categories (full)
-- [ ] CRUD Foods (full)
-- [ ] Upload gambar ke Supabase Storage
-- [ ] Filter & search pada GET /foods
-- [ ] Pagination
-
-## Fase 4 — Cart & Orders
-- [ ] CRUD Cart
-- [ ] Checkout (POST /orders dari cart)
-- [ ] List & detail orders (user)
-- [ ] Update status order (admin)
-
-## Fase 5 — Polish
-- [ ] Rate limiting semua endpoint
-- [ ] Validasi Zod semua endpoint
-- [ ] Error handling Prisma terpusat
-- [ ] Swagger docs lengkap
-- [ ] Test semua endpoint manual (Postman/Insomnia)
-
----
+## Belum Dimulai
+- [ ] Categories & Foods CRUD
+- [ ] Upload gambar Supabase Storage
+- [ ] Cart & Orders
+- [ ] Rate limiting, Swagger, Polish
 
 ## Selesai
 - [x] Inisialisasi project (package.json, struktur folder)
-- [x] Setup environment (.env, dotenv)
 - [x] Setup Express app (index.js, app.js)
-- [x] Health check endpoint GET /health
 - [x] Setup middleware global (cors, helmet, json parser, cookie-parser)
-- [x] Buat semua model di schema.prisma
-- [x] Tambah @@unique([cartId, foodId]) di CartItem
-- [x] Jalankan prisma migrate dev
-- [x] Semua tabel terbuat di Supabase
-
----
+- [x] Health check endpoint GET /health
+- [x] Buat semua model di schema.prisma + migrate ke Supabase
+- [x] src/utils/asyncHandler.js
+- [x] src/utils/AppError.js
+- [x] src/utils/response.js
+- [x] src/utils/jwt.js (hashToken & fingerprintRequest)
+- [x] src/utils/pagination.js
 
 ## Catatan & Keputusan Teknis
-- Supabase Storage dipakai untuk gambar produk (bukan Cloudinary)
-- Refresh token: Rotation + Reuse Detection (token lama ditandai USED, tidak dihapus)
-- Refresh token dikirim via httpOnly cookie (bukan response body)
-- Refresh token di-hash (SHA-256) sebelum disimpan ke DB
+- Supabase Storage untuk gambar produk (bukan Cloudinary)
+- Refresh token: Rotation + Reuse Detection
+- Refresh token via httpOnly cookie, di-hash SHA-256 sebelum disimpan
 - Token binding via User-Agent fingerprint
-- Reuse detected → seluruh family token di-revoke → user wajib login ulang
-- UUID dipakai untuk semua PK (bukan auto-increment)
-- Zod untuk validasi (bukan Joi/express-validator)
-- cookie-parser ditambahkan sebagai dependency untuk baca httpOnly cookie
+- Reuse detected → revoke seluruh family → user login ulang
+- UUID untuk semua PK
+- Zod untuk validasi
+- ES Module (import/export) di semua file

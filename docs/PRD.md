@@ -10,7 +10,7 @@ production-ready seperti auth, upload gambar, rate limiting, dan dokumentasi API
 - **Framework**: Express.js
 - **ORM**: Prisma
 - **Database**: Supabase (PostgreSQL)
-- **Auth**: JWT (access token + refresh token)
+- **Auth**: JWT (access token + refresh token dengan Rotation & Reuse Detection)
 - **Upload Gambar**: Supabase Storage
 - **Dokumentasi**: Swagger / OpenAPI 3.0
 - **Validasi**: Zod
@@ -92,8 +92,11 @@ production-ready seperti auth, upload gambar, rate limiting, dan dokumentasi API
 
 ### RefreshToken
 - id (uuid, PK)
-- token (string, unique)
+- token (string, unique) ← disimpan dalam bentuk hash SHA-256
 - userId (FK → User)
+- familyId (string) ← group semua token dalam satu sesi login
+- isUsed (boolean, default false) ← untuk deteksi reuse attack
+- fingerprint (string, optional) ← hash dari User-Agent
 - expiresAt (datetime)
 - createdAt
 
@@ -154,3 +157,7 @@ production-ready seperti auth, upload gambar, rate limiting, dan dokumentasi API
 - [ ] Response format konsisten: { success, message, data }
 - [ ] Pagination pada endpoint list (page, limit, total)
 - [ ] Search & filter pada endpoint /foods
+- [ ] Refresh token rotation + reuse detection
+- [ ] Refresh token via httpOnly cookie
+- [ ] Token binding via User-Agent fingerprint
+- [ ] Auto-revoke seluruh family token jika reuse terdeteksi
