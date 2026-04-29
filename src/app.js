@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 import routes from './routes/index.js';
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
 import { globalLimiter } from './middlewares/rateLimiter.js';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.js';
 
 const app = express();
 
@@ -24,6 +26,7 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/v1', routes);
 
 // Global Error Handler

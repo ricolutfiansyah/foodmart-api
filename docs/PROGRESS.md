@@ -1,6 +1,6 @@
 # PROGRESS — FoodMart E-Commerce API
 
-## Status: Session 7 — Orders (selesai)
+## Status: Session 8 — Rate Limiting (selesai)
 
 ---
 
@@ -8,7 +8,6 @@
 (kosong)
 
 ## Belum Dimulai
-- [ ] Rate limiting
 - [ ] Swagger docs
 - [ ] Test semua endpoint
 
@@ -52,6 +51,9 @@
 - [x] src/controllers/orderController.js
 - [x] src/routes/orderRoutes.js
 - [x] Update src/routes/index.js (semua routes + /api/v1/admin/orders)
+- [x] src/middlewares/rateLimiter.js (globalLimiter, authLimiter, strictLimiter)
+- [x] Update src/app.js (pasang globalLimiter)
+- [x] Update src/routes/authRoutes.js (pasang authLimiter & strictLimiter)
 
 ## Catatan & Keputusan Teknis
 - Supabase Storage untuk gambar produk (bukan Cloudinary)
@@ -71,3 +73,5 @@
 - priceAtOrder disimpan dari harga food saat checkout (bukan harga sekarang)
 - Semua operasi checkout dalam satu transaksi Prisma (atomic)
 - GET /api/v1/admin/orders di-mount langsung di routes/index.js (bukan di orderRoutes)
+- Rate limiter di-skip otomatis saat NODE_ENV === 'development'
+- Shared config object limitHandler dengan spread operator untuk menghindari duplikasi
