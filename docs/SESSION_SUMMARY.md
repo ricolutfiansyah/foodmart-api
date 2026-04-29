@@ -1,121 +1,140 @@
-tolong baca dulu docs/SESSION_SUMMARY.md, 
-ini berisi ringkasan dari session yang sudah saya kerjakan sebelumnya, buat sebagai pengingat saja. Selanjutnya kita akan lanjut ke session berikutnya.
+# Session Summary — FoodMart E-Commerce API
+> Gunakan dokumen ini sebagai konteks saat memulai chat baru.
+> Paste dokumen ini + isi docs/PRD.md + docs/ARCHITECTURE.md + docs/PROGRESS.md
 
-Kamu adalah senior backend developer Node.js yang berpengalaman.
-Kamu selalu mengikuti konvensi dan arsitektur yang sudah ditentukan.
-Jika ada keputusan teknis yang belum ditentukan, tanya dulu sebelum eksekusi.
+---
 
-Baca file-file berikut di folder docs/:
-- docs/PRD.md
-- docs/ARCHITECTURE.md
-- docs/PROGRESS.md
+## Status Saat Ini
+**Selesai sampai Session 5 (Categories & Foods)**
+Siap lanjut ke **Session 6 — Cart**
 
-Project ini menggunakan ES Module (import/export), bukan CommonJS.
-Semua file harus pakai import/export dan sertakan ekstensi .js saat import file lokal.
+---
 
-Sekarang kerjakan Task Session 5 — Categories & Foods:
+## Yang Sudah Selesai
 
-1. src/config/supabase.js
-   - Inisialisasi Supabase client menggunakan SUPABASE_URL dan SUPABASE_SERVICE_KEY dari .env
-   - Export sebagai default
+### Session 1 — Foundation
+- ✅ Inisialisasi project Node.js + Express
+- ✅ Struktur folder sesuai ARCHITECTURE.md
+- ✅ `.env.example` dengan semua variabel
+- ✅ `src/index.js` + `src/app.js`
+- ✅ Health check endpoint `GET /health`
+- ✅ Middleware global: cors, helmet, json parser, cookie-parser
 
-2. src/middlewares/upload.js
-   - Gunakan multer dengan memoryStorage() — file tidak disimpan ke disk
-   - Hanya izinkan file image/jpeg, image/png, image/webp
-   - Maksimal ukuran file: 2MB
-   - Jika tipe file tidak valid, throw AppError 400
-   - Export sebagai default
+### Session 2 — Prisma Schema
+- ✅ `prisma/schema.prisma` dengan semua model:
+  User, RefreshToken, Category, Food, Cart, CartItem, Order, OrderItem
+- ✅ `@@unique([cartId, foodId])` di CartItem
+- ✅ Migration berhasil ke Supabase
+- ✅ `src/config/prisma.js` (Prisma client singleton)
 
-3. src/validators/foodValidator.js
-   - Zod schema createFoodSchema:
-     - name: string, required
-     - description: string, optional
-     - price: number, positif
-     - stock: integer, minimal 0
-     - categoryId: string uuid
-     - isAvailable: boolean, optional (default true)
-   - Zod schema updateFoodSchema: semua field optional kecuali aturan tipe tetap sama
+### Session 3 — Utils
+- ✅ `src/utils/asyncHandler.js`
+- ✅ `src/utils/AppError.js`
+- ✅ `src/utils/response.js` — format `{ success, message, data, meta }`
+- ✅ `src/utils/jwt.js` — signAccessToken, signRefreshToken, verifyToken, hashToken, fingerprintRequest
+- ✅ `src/utils/pagination.js`
 
-4. src/repositories/categoryRepository.js
-   - findAll() — ambil semua kategori, urutkan by name asc
-   - findById(id)
-   - findBySlug(slug)
-   - create(data) — data: { name, slug }
-   - update(id, data)
-   - delete(id)
+### Session 4 — Auth
+- ✅ `src/validators/authValidator.js`
+- ✅ `src/repositories/authRepository.js`
+- ✅ `src/services/authService.js` — rotation + reuse detection + fingerprint
+- ✅ `src/controllers/authController.js`
+- ✅ `src/routes/authRoutes.js`
+- ✅ `src/middlewares/authMiddleware.js` — export: `authMiddleware`
+- ✅ `src/middlewares/roleMiddleware.js` — export: `roleMiddleware`
+- ✅ `src/middlewares/errorMiddleware.js`
+- ✅ `src/routes/index.js` — mount /api/v1/auth
+- ✅ Semua endpoint ditest di Postman dan berhasil
 
-5. src/services/categoryService.js
-   - getAllCategories()
-   - getCategoryById(id) — throw AppError 404 jika tidak ada
-   - createCategory(data)
-     - generate slug dari name (lowercase, spasi → tanda hubung)
-     - cek slug belum dipakai, throw AppError 409 jika sudah ada
-   - updateCategory(id, data)
-     - regenerate slug jika name berubah
-     - cek slug belum dipakai oleh kategori lain
-   - deleteCategory(id)
-     - throw AppError 404 jika tidak ada
+### Session 5 — Categories & Foods
+- ✅ `src/config/supabase.js`
+- ✅ `src/middlewares/upload.js` — multer memoryStorage, max 2MB, JPEG/PNG/WebP
+- ✅ `src/validators/foodValidator.js` — createFoodSchema, updateFoodSchema
+- ✅ `src/repositories/categoryRepository.js`
+- ✅ `src/services/categoryService.js` — auto-generate slug
+- ✅ `src/controllers/categoryController.js`
+- ✅ `src/routes/categoryRoutes.js`
+- ✅ `src/repositories/foodRepository.js` — filter by search, categoryId, isAvailable
+- ✅ `src/services/foodService.js` — upload/delete gambar ke Supabase Storage
+- ✅ `src/controllers/foodController.js`
+- ✅ `src/routes/foodRoutes.js`
+- ✅ Update `src/routes/index.js` — mount /api/v1/categories & /api/v1/foods
+- ✅ Semua endpoint ditest di Postman dan berhasil
 
-6. src/controllers/categoryController.js
-   - getAllCategories, getCategoryById, createCategory, updateCategory, deleteCategory
-   - Semua dibungkus asyncHandler
-   - Gunakan sendResponse dari utils/response.js
+---
 
-7. src/routes/categoryRoutes.js
-   - GET / → getAllCategories (guest)
-   - GET /:id → getCategoryById (guest)
-   - POST / → protect, adminOnly, createCategory
-   - PATCH /:id → protect, adminOnly, updateCategory
-   - DELETE /:id → protect, adminOnly, deleteCategory
+## Keputusan Teknis Penting
 
-8. src/repositories/foodRepository.js
-   - findAll({ page, limit, search, categoryId, isAvailable })
-     - search: filter by name (contains, case-insensitive)
-     - categoryId: filter by kategori
-     - isAvailable: filter by status
-     - return { data, total } untuk pagination
-   - findById(id) — include category
-   - create(data)
-   - update(id, data)
-   - delete(id)
+| Hal | Keputusan |
+|-----|-----------|
+| Module system | ES Module (import/export) di semua file |
+| Refresh token | Rotation + Reuse Detection + httpOnly cookie |
+| Token storage | Di-hash SHA-256 sebelum disimpan ke DB |
+| Fingerprint | Hash dari User-Agent untuk binding device |
+| Reuse detected | Revoke seluruh family token → user login ulang |
+| Upload gambar | Supabase Storage bucket `foods` |
+| Validasi | Zod — safeParse di controller |
+| Error format Zod | `err.errors.map(e => ({ field, message }))` |
+| PK | UUID semua tabel |
+| ORM | Prisma v5 |
+| Middleware auth | Export named: `authMiddleware` (bukan `protect`) |
+| Middleware role | Export named: `roleMiddleware` (bukan `adminOnly`) |
+| isAvailable | Manual — tidak otomatis false saat stock 0 (support pre-order) |
+| imageKey | Disimpan di DB untuk hapus file dari Storage |
 
-9. src/services/foodService.js
-   - getAllFoods(query) — gunakan getPaginationParams dari utils/pagination.js
-   - getFoodById(id) — throw AppError 404 jika tidak ada
-   - createFood(data, file)
-     - jika ada file: upload ke Supabase Storage bucket 'foods'
-     - filename: foods/{uuid}-{originalname}
-     - simpan imageUrl dan imageKey ke data
-   - updateFood(id, data, file)
-     - jika ada file baru: hapus gambar lama dari Storage (gunakan imageKey), upload gambar baru
-   - deleteFood(id)
-     - hapus gambar dari Storage jika ada imageKey
-     - hapus data dari DB
+---
 
-10. src/controllers/foodController.js
-    - getAllFoods, getFoodById, createFood, updateFood, deleteFood
-    - Semua dibungkus asyncHandler
-    - createFood dan updateFood gunakan upload.single('image') sebagai middleware
-    - Gunakan sendResponse dari utils/response.js
+## Stack & Tools
 
-11. src/routes/foodRoutes.js
-    - GET / → getAllFoods (guest)
-    - GET /:id → getFoodById (guest)
-    - POST / → protect, adminOnly, upload.single('image'), createFood
-    - PATCH /:id → protect, adminOnly, upload.single('image'), updateFood
-    - DELETE /:id → protect, adminOnly, deleteFood
+| Komponen | Pilihan |
+|----------|---------|
+| Runtime | Node.js |
+| Framework | Express.js |
+| ORM | Prisma + Supabase (PostgreSQL) |
+| Auth | JWT access token (15m) + refresh token (7d) |
+| Upload | Supabase Storage |
+| Validasi | Zod |
+| Docs | Swagger (belum dibuat) |
+| IDE | Google Antigravity |
+| Git | Per fase, PR ke main |
 
-12. Update src/routes/index.js
-    - Mount categoryRoutes ke /api/v1/categories
-    - Mount foodRoutes ke /api/v1/foods
+---
 
-Aturan wajib:
-- Gunakan ES Module (import/export)
-- Gunakan asyncHandler di semua controller
-- Gunakan AppError untuk semua error yang diketahui
-- Gunakan sendResponse dan sendError dari utils/response.js
-- Gunakan getPaginationParams dari utils/pagination.js untuk endpoint list
-- Gunakan protect dari middlewares/authMiddleware.js
-- Gunakan adminOnly dari middlewares/roleMiddleware.js
-- Jangan buat file di luar scope task
-- Kalau ada yang tidak jelas, tanya dulu
+## Git Workflow yang Dipakai
+
+main (production)
+└── feat/1-setup-foundation (merged)
+└── feat/2-prisma-schema (merged)
+└── feat/3-utils (merged)
+└── feat/4-auth (merged)
+└── feat/5-categories-foods (merged)
+└── feat/6-cart ← berikutnya
+
+Format commit: Conventional Commits
+
+feat: add cart management
+fix: handle duplicate cart item
+
+---
+
+## Yang Belum Dikerjakan
+
+### Session 6 — Cart
+- cartRepository, cartService, cartController, cartRoutes
+- Business rules: satu user satu cart, auto-create cart, cek stok & isAvailable
+
+### Session 7 — Orders
+### Session 8 — Polish
+- Rate limiting
+- Swagger docs
+- Test semua endpoint
+
+---
+
+## Cara Lanjut di Chat Baru
+
+1. Paste dokumen ini
+2. Paste isi `docs/PRD.md`
+3. Paste isi `docs/ARCHITECTURE.md`
+4. Paste isi `docs/PROGRESS.md`
+5. Bilang: "Lanjut ke Session 6 — Cart"
