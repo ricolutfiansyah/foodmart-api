@@ -1,6 +1,6 @@
 # PROGRESS — FoodMart E-Commerce API
 
-## Status: Session 8 — Rate Limiting (selesai)
+## Status: Session 9 — Swagger Docs (selesai)
 
 ---
 
@@ -8,7 +8,6 @@
 (kosong)
 
 ## Belum Dimulai
-- [ ] Swagger docs
 - [ ] Test semua endpoint
 
 ## Selesai
@@ -52,8 +51,13 @@
 - [x] src/routes/orderRoutes.js
 - [x] Update src/routes/index.js (semua routes + /api/v1/admin/orders)
 - [x] src/middlewares/rateLimiter.js (globalLimiter, authLimiter, strictLimiter)
-- [x] Update src/app.js (pasang globalLimiter)
-- [x] Update src/routes/authRoutes.js (pasang authLimiter & strictLimiter)
+- [x] Update src/app.js (pasang globalLimiter + mount Swagger UI di /api-docs)
+- [x] Update src/routes/authRoutes.js (pasang authLimiter & strictLimiter + JSDoc)
+- [x] src/config/swagger.js (setup swagger-jsdoc, OpenAPI 3.0, BearerAuth)
+- [x] Update src/routes/categoryRoutes.js (JSDoc)
+- [x] Update src/routes/foodRoutes.js (JSDoc)
+- [x] Update src/routes/cartRoutes.js (JSDoc)
+- [x] Update src/routes/orderRoutes.js (JSDoc)
 
 ## Catatan & Keputusan Teknis
 - Supabase Storage untuk gambar produk (bukan Cloudinary)
@@ -75,3 +79,7 @@
 - GET /api/v1/admin/orders di-mount langsung di routes/index.js (bukan di orderRoutes)
 - Rate limiter di-skip otomatis saat NODE_ENV === 'development'
 - Shared config object limitHandler dengan spread operator untuk menghindari duplikasi
+- Swagger: inline JSDoc di route files, bukan file YAML terpisah
+- swagger-jsdoc scan otomatis semua file di src/routes/*.js
+- Base URL dibaca dari env BASE_URL, fallback ke http://localhost:3000
+- userRoutes.js dibuat tapi belum di-mount — fitur user management belum dikerjakan
