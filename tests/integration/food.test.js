@@ -49,8 +49,10 @@ describe('Food Integration Tests', () => {
     userToken = userLogin.body.data.accessToken;
 
     // Create a test category for the foods
-    const category = await prisma.category.create({
-      data: { name: 'Test Category For Food', slug: 'test-category-for-food' }
+    const category = await prisma.category.upsert({
+      where: { slug: 'test-category-for-food' },
+      update: {},
+      create: { name: 'Test Category For Food', slug: 'test-category-for-food' }
     });
     testCategoryId = category.id;
   });
@@ -62,8 +64,8 @@ describe('Food Integration Tests', () => {
     });
 
     // Delete category
-    await prisma.category.delete({
-      where: { id: testCategoryId }
+    await prisma.category.deleteMany({
+      where: { slug: 'test-category-for-food' }
     });
 
     // Delete users

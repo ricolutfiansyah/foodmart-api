@@ -58,8 +58,10 @@ describe('Order Integration Tests', () => {
     anotherToken = anotherLogin.body.data.accessToken;
 
     // 4. Create category via Prisma
-    const category = await prisma.category.create({
-      data: { name: 'Test Category Order', slug: 'test-category-order' }
+    const category = await prisma.category.upsert({
+      where: { slug: 'test-category-order' },
+      update: {},
+      create: { name: 'Test Category Order', slug: 'test-category-order' }
     });
     testCategoryId = category.id;
 
@@ -88,12 +90,12 @@ describe('Order Integration Tests', () => {
     await prisma.order.deleteMany({});
     await prisma.cartItem.deleteMany({});
     await prisma.cart.deleteMany({});
-    
+
     await prisma.food.deleteMany({
       where: { id: testFoodId }
     });
-    await prisma.category.delete({
-      where: { id: testCategoryId }
+    await prisma.category.deleteMany({
+      where: { slug: 'test-category-order' }
     });
     await prisma.user.deleteMany({
       where: { email: { in: [adminUser.email, normalUser.email, anotherUser.email] } }
@@ -111,7 +113,7 @@ describe('Order Integration Tests', () => {
       expect(res.body.success).toBe(true);
       expect(res.body.data).toHaveProperty('id');
       expect(res.body.data).toHaveProperty('totalPrice');
-      
+
       testOrderId = res.body.data.id;
     });
 
@@ -145,7 +147,7 @@ describe('Order Integration Tests', () => {
 
     it('should return 401 without token', async () => {
       const res = await request(app).get('/api/v1/orders');
-      
+
       expect(res.status).toBe(401);
     });
   });
@@ -166,7 +168,7 @@ describe('Order Integration Tests', () => {
       const res = await request(app)
         .get(`/api/v1/orders/${fakeId}`)
         .set('Authorization', `Bearer ${userToken}`);
-      
+
       expect(res.status).toBe(404);
     });
 
