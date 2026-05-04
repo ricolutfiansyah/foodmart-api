@@ -81,9 +81,7 @@ export const refresh = async (token, req) => {
   }
 
   if (storedToken.isUsed) {
-    await authRepo.revokeTokenFamily(storedToken.familyId);
-    console.warn(`[AUTH] REUSE DETECTED! Revoking family: ${storedToken.familyId}`);
-    throw new AppError('Session compromised, please login again', 401);
+    throw new AppError('Refresh token has been revoked', 401);
   }
 
   const currentFingerprint = fingerprintRequest(req);
@@ -93,24 +91,9 @@ export const refresh = async (token, req) => {
     throw new AppError('Session compromised, please login again', 401);
   }
 
-  await authRepo.markTokenAsUsed(storedToken.id);
-
   const accessToken = signAccessToken({ id: storedToken.user.id, role: storedToken.user.role });
-  const newRefreshToken = signRefreshToken({ id: storedToken.user.id });
 
-  const hashedNewRefreshToken = hashToken(newRefreshToken);
-
-  const expiresAt = getRefreshTokenExpiry();
-
-  await authRepo.createRefreshToken({
-    token: hashedNewRefreshToken,
-    userId: storedToken.user.id,
-    familyId: storedToken.familyId,
-    fingerprint: currentFingerprint,
-    expiresAt,
-  });
-
-  return { accessToken, newRefreshToken };
+  return { accessToken };
 };
 
 export const logout = async (token) => {

@@ -45,9 +45,8 @@ export const refresh = asyncHandler(async (req, res) => {
     throw new AppError('Refresh token not found', 401);
   }
 
-  const { accessToken, newRefreshToken } = await authService.refresh(token, req);
+  const { accessToken } = await authService.refresh(token, req);
 
-  res.cookie('refreshToken', newRefreshToken, cookieOptions);
   return sendResponse(res, 200, 'Token refreshed successfully', { accessToken });
 });
 
