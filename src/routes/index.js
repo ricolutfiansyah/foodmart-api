@@ -7,6 +7,7 @@ import orderRoutes from './orderRoutes.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { roleMiddleware } from '../middlewares/roleMiddleware.js';
 import * as orderController from '../controllers/orderController.js';
+import * as dashboardController from '../controllers/dashboardController.js';
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use('/foods', foodRoutes);
 router.use('/cart', cartRoutes);
 router.use('/orders', orderRoutes);
 router.get('/admin/orders', authMiddleware, roleMiddleware, orderController.getAllOrders);
+router.get('/admin/dashboard-stats', authMiddleware, roleMiddleware, dashboardController.getStats);
 
 export default router;

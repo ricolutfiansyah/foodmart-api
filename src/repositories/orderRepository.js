@@ -37,6 +37,9 @@ export const findById = async (id) => {
     include: {
       orderItems: {
         include: { food: true }
+      },
+      user: {
+        select: { name: true }
       }
     }
   });

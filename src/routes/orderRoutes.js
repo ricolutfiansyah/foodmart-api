@@ -226,6 +226,5 @@ router.patch('/:id/cancel', authMiddleware, orderController.cancelMyOrder);
  *       404:
  *         description: Not Found
  */
-router.get('/admin/orders', authMiddleware, roleMiddleware, orderController.getAllOrders);
 
 export default router;

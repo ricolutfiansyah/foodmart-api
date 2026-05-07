@@ -13,7 +13,6 @@ export const checkout = async (userId, data) => {
     throw new AppError('Cart is empty', 400);
   }
 
-  // Filter item berdasarkan ceklist (jika ada), kalau tidak kirim cartItemIds = checkout semua
   const selectedItems = cartItemIds
     ? cart.cartItems.filter(item => cartItemIds.includes(item.id))
     : cart.cartItems;
