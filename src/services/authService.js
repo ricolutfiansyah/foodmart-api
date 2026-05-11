@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import * as authRepo from '../repositories/authRepository.js';
 import { AppError } from '../utils/AppError.js';
 import { signAccessToken, signRefreshToken, hashToken, verifyToken, fingerprintRequest } from '../utils/jwt.js';
+import { redis } from '../config/redis.js';
 
 const getRefreshTokenExpiry = () => {
   const days = parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN) || 7;
@@ -74,35 +75,82 @@ export const refresh = async (token, req) => {
   }
 
   const hashedIncomingToken = hashToken(token);
-  const storedToken = await authRepo.findRefreshToken(hashedIncomingToken);
-
-  if (!storedToken) {
-    throw new AppError('Invalid refresh token', 401);
-  }
-
-  if (storedToken.isUsed) {
-    throw new AppError('Refresh token has been revoked', 401);
-  }
-
   const currentFingerprint = fingerprintRequest(req);
-  if (storedToken.fingerprint !== currentFingerprint) {
-    await authRepo.revokeTokenFamily(storedToken.familyId);
-    console.warn(`[AUTH] Fingerprint mismatch! Revoking family: ${storedToken.familyId}`);
-    throw new AppError('Session compromised, please login again', 401);
+  const graceKey = `refresh_grace:${currentFingerprint}:${hashedIncomingToken}`;
+
+  const cachedResponse = await redis.get(graceKey);
+  if (cachedResponse) {
+    return cachedResponse;
   }
 
-  const accessToken = signAccessToken({ id: storedToken.user.id, role: storedToken.user.role });
+  const lockKey = `refresh_lock:${hashedIncomingToken}`;
+  const lockAcquired = await redis.set(lockKey, 'locked', { nx: true, ex: 15 });
 
-  return { accessToken };
+  if (!lockAcquired) {
+    for (let i = 0; i < 10; i++) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      const result = await redis.get(graceKey);
+      if (result) return result;
+    }
+    throw new AppError('Token refresh in progress, please retry', 409);
+  }
+
+  try {
+    const storedToken = await authRepo.findRefreshToken(hashedIncomingToken);
+
+    if (!storedToken) {
+      throw new AppError('Invalid refresh token', 401);
+    }
+
+    if (storedToken.isUsed) {
+      await authRepo.revokeTokenFamily(storedToken.familyId);
+      console.warn(`[AUTH] Token reuse detected! Revoking family: ${storedToken.familyId}`);
+      throw new AppError('Session compromised, please login again', 401);
+    }
+
+    if (storedToken.fingerprint !== currentFingerprint) {
+      await authRepo.revokeTokenFamily(storedToken.familyId);
+      console.warn(`[AUTH] Fingerprint mismatch! Revoking family: ${storedToken.familyId}`);
+      throw new AppError('Session compromised, please login again', 401);
+    }
+
+    await authRepo.markTokenAsUsed(storedToken.id);
+
+    const accessToken = signAccessToken({ id: storedToken.user.id, role: storedToken.user.role });
+    const newRefreshToken = signRefreshToken({ id: storedToken.user.id });
+
+    await authRepo.createRefreshToken({
+      token: hashToken(newRefreshToken),
+      userId: storedToken.user.id,
+      familyId: storedToken.familyId,
+      fingerprint: currentFingerprint,
+      expiresAt: getRefreshTokenExpiry(),
+    });
+
+    const responseData = { accessToken, refreshToken: newRefreshToken };
+
+    await redis.set(graceKey, responseData, { ex: 15 });
+
+    return responseData;
+  } catch (error) {
+    await redis.del(lockKey);
+    throw error;
+  }
 };
 
 export const logout = async (token) => {
   const hashedToken = hashToken(token);
   const storedToken = await authRepo.findRefreshToken(hashedToken);
 
-  if (storedToken) {
-    await authRepo.markTokenAsUsed(storedToken.id);
+  if (!storedToken) return;
+
+  if (storedToken.isUsed) {
+    await authRepo.revokeTokenFamily(storedToken.familyId);
+    console.warn(`[AUTH] Logout attempted with used token! Revoking family: ${storedToken.familyId}`);
+    return;
   }
+
+  await authRepo.markTokenAsUsed(storedToken.id);
 };
 
 export const getMe = async (userId) => {

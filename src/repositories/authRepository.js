@@ -42,3 +42,14 @@ export const deleteRefreshToken = async (hashedToken) => {
     where: { token: hashedToken }
   });
 };
+
+export const deleteExpiredTokens = async () => {
+  return prisma.refreshToken.deleteMany({
+    where: {
+      OR: [
+        { expiresAt: { lt: new Date() } },
+        { isUsed: true },
+      ],
+    },
+  });
+};

@@ -19,20 +19,16 @@ export const cacheMiddleware = (key, ttl = 60) => {
             const cached = await redis.get(cacheKey);
 
             if (cached) {
-                // Cache HIT — return cached response directly
                 const data = typeof cached === 'string' ? JSON.parse(cached) : cached;
                 return res.status(200).json(data);
             }
         } catch (err) {
             console.error(`[Cache] Redis GET error for key "${cacheKey}":`, err.message);
-            // Redis error — don't block request, continue to controller
         }
 
-        // Cache MISS — intercept res.json to capture response
         const originalJson = res.json.bind(res);
 
         res.json = (body) => {
-            // Only cache successful responses
             if (body && body.success === true) {
                 redis.set(cacheKey, JSON.stringify(body), { ex: ttl }).catch((err) => {
                     console.error(`[Cache] Redis SET error for key "${cacheKey}":`, err.message);
