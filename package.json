@@ -8,6 +8,9 @@
     "dev": "nodemon src/index.js",
     "test": "cross-env NODE_ENV=test jest --runInBand"
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "jest": {
     "testEnvironment": "node",
     "setupFiles": [
@@ -43,6 +46,8 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.2",
+    "@faker-js/faker": "^10.4.0",
+    "@types/node": "^25.7.0",
     "babel-jest": "^30.3.0",
     "cross-env": "^10.1.0",
     "dotenv-cli": "^11.0.0",
