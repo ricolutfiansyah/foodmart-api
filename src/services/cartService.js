@@ -18,9 +18,11 @@ export const getCart = async (userId) => {
 export const addToCart = async (userId, data) => {
   const { foodId, quantity } = data;
 
-  const cartId = await cartRepository.getOrCreateCartId(userId);
+  const [cartId, food] = await Promise.all([
+    cartRepository.getOrCreateCartId(userId),
+    foodRepository.findById(foodId)
+  ]);
 
-  const food = await foodRepository.findById(foodId);
   if (!food) {
     throw new AppError('Food not found', 404);
   }
@@ -29,7 +31,7 @@ export const addToCart = async (userId, data) => {
     throw new AppError('Food is currently not available', 400);
   }
 
-  const existingItem = await cartRepository.findCartItem(cartId, foodId);
+  let existingItem = await cartRepository.findCartItem(cartId, foodId);
 
   if (existingItem) {
     const newQuantity = existingItem.quantity + quantity;
