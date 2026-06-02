@@ -9,10 +9,15 @@ export const getPaginationOptions = (queryPage = 1, queryLimit = 10) => {
 };
 
 export const formatPaginationMeta = (page, limit, total) => {
+  const totalPages = Math.ceil(total / limit);
+
   return {
     page,
+    currentPage: page,
     limit,
     total,
-    totalPages: Math.ceil(total / limit),
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
   };
 };

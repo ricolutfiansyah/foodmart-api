@@ -1,5 +1,15 @@
 import prisma from '../config/prisma.js';
 
+export const getOrCreateCartId = async (userId) => {
+  const cart = await prisma.cart.upsert({
+    where: { userId },
+    update: {},
+    create: { userId },
+    select: { id: true }
+  });
+  return cart.id;
+};
+
 export const findCartByUserId = async (userId) => {
   return prisma.cart.findUnique({
     where: { userId },

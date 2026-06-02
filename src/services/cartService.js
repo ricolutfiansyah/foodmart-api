@@ -18,10 +18,7 @@ export const getCart = async (userId) => {
 export const addToCart = async (userId, data) => {
   const { foodId, quantity } = data;
 
-  let cart = await cartRepository.findCartByUserId(userId);
-  if (!cart) {
-    cart = await cartRepository.createCart(userId);
-  }
+  const cartId = await cartRepository.getOrCreateCartId(userId);
 
   const food = await foodRepository.findById(foodId);
   if (!food) {
@@ -32,7 +29,7 @@ export const addToCart = async (userId, data) => {
     throw new AppError('Food is currently not available', 400);
   }
 
-  const existingItem = await cartRepository.findCartItem(cart.id, foodId);
+  const existingItem = await cartRepository.findCartItem(cartId, foodId);
 
   if (existingItem) {
     const newQuantity = existingItem.quantity + quantity;
@@ -44,7 +41,7 @@ export const addToCart = async (userId, data) => {
     if (food.stock < quantity) {
       throw new AppError('Not enough stock available', 400);
     }
-    await cartRepository.addCartItem(cart.id, foodId, quantity);
+    await cartRepository.addCartItem(cartId, foodId, quantity);
   }
 
   return cartRepository.findCartByUserId(userId);
